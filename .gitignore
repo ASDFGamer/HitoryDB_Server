@@ -1,2 +1,5 @@
 __pycache__/**
 venv/**
+coordinatesWiki.json
+queryID.json
+db.sqlite
