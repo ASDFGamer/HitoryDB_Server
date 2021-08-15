@@ -1,0 +1,2 @@
+export FLASK_APP=historyDB
+export FLASK_ENV=development

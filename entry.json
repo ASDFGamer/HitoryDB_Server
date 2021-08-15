@@ -1,0 +1,12 @@
+{
+	"article": {
+		"type": "uri",
+		"value": "http://www.wikidata.org/entity/Q3682385"
+	},
+	"pleiadesID": { "type": "literal", "value": "Congavata" },
+	"articleLabel": {
+		"xml:lang": "en",
+		"type": "literal",
+		"value": "Coggabata"
+	}
+}

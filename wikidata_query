@@ -1,0 +1,7 @@
+#This queries all pleiadesIDs from Wikidata with the WikidataID
+SELECT ?article ?articleLabel ?pleiadesID  
+WHERE {
+  ?article wdt:P1584 ?pleiadesID . 
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } 
+} 
+ORDER BY ASC(?pleiadesID)
