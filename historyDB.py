@@ -35,16 +35,32 @@ def stats():
 	}
 
 @app.route("/v1/location", methods=['GET'])
-def findLocation():
+def findLocations():
 	#[[38.41719605, 27.141387], [38.41719605, 27.141387]]
 	if not request.args.get('location'):
 		return "Please Provide a location"
 	location = json.loads(request.args.get('location'))
-	results = findLocations(location[0], location[1])
+	results = findInRegion(location[0], location[1])
 	return jsonify(results)
-	
-def findLocations(corner1, corner2):
-	conn = sqlite3.connect(dbname)
+
+@app.route("/v1/location/<id>/")
+def findLocation(id):
+	return findID(id)
+
+def findID(id):
+	conn = getConnection()
+	cursor = conn.execute("SELECT * FROM IDS WHERE ID == '{}'".format(id))
+	for row in cursor:
+		#TODO check that only one row exists
+		result = formatIDResult(row)
+	conn.close()
+	return result
+
+def getConnection():
+	return sqlite3.connect(dbname)
+
+def findInRegion(corner1, corner2):
+	conn = getConnection()
 	highLangitude = max(corner1[0], corner2[0])
 	lowLangitude = min(corner1[0], corner2[0])
 	highLongitude = max(corner1[1], corner2[1])
@@ -52,14 +68,18 @@ def findLocations(corner1, corner2):
 	results = []
 	cursor = conn.execute("SELECT i.* FROM IDS i LEFT JOIN LOCATION l on l.ID = i.ID WHERE l.Longitude >= {} AND l.Longitude <= {} AND l.Latitude >= {} AND l.Latitude <= {};".format(lowLongitude, highLongitude, lowLangitude, highLangitude))
 	for row in cursor:
-		results.append({
-			"wikidata_id": row[0], 
-			"pleiades_id": row[1]
-			})
+		results.append(formatIDResult(row))
+	conn.close()
 	return results
 
+def formatIDResult(row):
+	return {
+		"wikidata_id": row[0], 
+		"pleiades_id": row[1]
+	}
+
 def countObjects():
-	conn = sqlite3.connect(dbname)
+	conn = getConnection()
 	cursor = conn.execute("SELECT Count(*) FROM IDS")
 	for row in cursor:
 		print(row)
@@ -68,7 +88,7 @@ def countObjects():
 	return row[0]
 
 def countCoordinates():
-	conn = sqlite3.connect(dbname)
+	conn = getConnection()
 	cursor = conn.execute("SELECT Count(*) FROM LOCATION")
 	for row in cursor:
 		print(row)
