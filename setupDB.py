@@ -18,7 +18,8 @@ def setupDB(conn):
 		conn.execute('''CREATE TABLE LOCATION
 			(ID 	 CHAR(50) PRIMARY KEY NOT NULL,
 			Latitude	 FLOAT	  NOT NULL,
-			Longitude FLOAT	  NOT NULL);''')
+			Longitude FLOAT	  NOT NULL,
+			FOREIGN KEY (ID) REFERENCES IDS (ID));''')
 	except:
 		return False
 	return True
