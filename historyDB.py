@@ -10,7 +10,10 @@ from os.path import dirname, realpath
 sys.path.insert(0, realpath(dirname(__file__)))
 
 #webserver
-from flask import Flask
+from flask import Flask, request, jsonify
+
+#Location String parsing
+import json
 #database
 import sqlite3
 
@@ -21,7 +24,7 @@ conn = sqlite3.connect(dbname)
 app = Flask("historyDB")
 
 @app.route("/v1/")
-def hello_world():
+def home():
 	return  {'title':'HistoryDB', 'version': 0.1}
 
 @app.route("/v1/stats")
@@ -31,13 +34,36 @@ def stats():
 		'coordinates': countCoordinates()
 	}
 
+@app.route("/v1/location", methods=['GET'])
+def findLocation():
+	#[[38.41719605, 27.141387], [38.41719605, 27.141387]]
+	if not request.args.get('location'):
+		return "Please Provide a location"
+	location = json.loads(request.args.get('location'))
+	results = findLocations(location[0], location[1])
+	return jsonify(results)
+	
+def findLocations(corner1, corner2):
+	conn = sqlite3.connect(dbname)
+	highLangitude = max(corner1[0], corner2[0])
+	lowLangitude = min(corner1[0], corner2[0])
+	highLongitude = max(corner1[1], corner2[1])
+	lowLongitude = min(corner1[1], corner2[1])
+	results = []
+	cursor = conn.execute("SELECT i.* FROM IDS i LEFT JOIN LOCATION l on l.ID = i.ID WHERE l.Longitude >= {} AND l.Longitude <= {} AND l.Latitude >= {} AND l.Latitude <= {};".format(lowLongitude, highLongitude, lowLangitude, highLangitude))
+	for row in cursor:
+		results.append({
+			"wikidata_id": row[0], 
+			"pleiades_id": row[1]
+			})
+	return results
 
 def countObjects():
 	conn = sqlite3.connect(dbname)
 	cursor = conn.execute("SELECT Count(*) FROM IDS")
 	for row in cursor:
 		print(row)
-		result  =row[0]
+		result = row[0]
 	conn.close()
 	return row[0]
 
